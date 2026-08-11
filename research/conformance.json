@@ -1,0 +1,28 @@
+{
+  "schema": "stegverse.erl.research_conformance.v1",
+  "repository": "StegVerse-Labs/StegBiography",
+  "role": "biographical-umbrella-acquisition-surface",
+  "canonical_owner": "StegVerse-Labs/Executive_Rhetoric_Ledger#60",
+  "evaluation_authority": "StegVerse-Labs/Executive_Rhetoric_Ledger",
+  "acquisition_authority": "local-public-source-discovery",
+  "adapter": "scripts/search_agent.py",
+  "frontier": "research/frontier.json",
+  "recurrence": {
+    "classification": "DELEGATED",
+    "owner": "subject-specific registered research surfaces",
+    "cadence_default": "event-driven",
+    "basis": "umbrella repository should not duplicate recurrence already owned by subject repositories",
+    "stop_condition": "delegation remains while a canonical subject surface owns the trajectory; otherwise classify trajectory independently"
+  },
+  "scheduled_ingest": {
+    "classification": "none",
+    "paths": [],
+    "note": "Umbrella-level recurrence is delegated unless a trajectory lacks a subject-specific owner."
+  },
+  "candidate_posture": "lead-only/context-only until ERL review",
+  "native_records_mutation_by_erl_sidecar": false,
+  "github_token_authority": "NONE",
+  "credential_authority": "TV/TVC where applicable",
+  "validation_state": "PENDING_VALIDATION",
+  "next_action": "run deterministic populated fixture including delegation behavior, validate ERL intake/transport, then promote registry to CONFORMING"
+}
