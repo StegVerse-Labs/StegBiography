@@ -1,0 +1,33 @@
+{
+  "schema": "stegverse.erl.research_surface_validation_receipt.v1",
+  "repository": "StegVerse-Labs/StegBiography",
+  "adapter_commit": "6fe2ec4af4f26806fdbb39606d996e1c39821f76",
+  "test_fixture_commit": "5b4facf494d9a756b10ca71d6dd434920b955961",
+  "validation_type": "local_deterministic_populated_execution_and_erl_intake",
+  "fixture": {
+    "recurrence_classification": "DELEGATED",
+    "frontier_trajectory": "T1 ACTIVE with alpha beta acquisition query",
+    "explicit_request": "REQ1",
+    "source": "deterministic in-memory HTML source",
+    "matching_links": 2,
+    "unique_matching_links": 1,
+    "nonmatching_links": 1
+  },
+  "assertions": {
+    "delegated_frontier_auto_search_suppressed": true,
+    "explicit_request_executed": true,
+    "candidate_count": 1,
+    "duplicate_links_collapsed": true,
+    "receipt_result": "CANDIDATES_EMITTED",
+    "candidate_intake_validator": "PASS",
+    "candidate_schema": "stegverse.erl.research_source_candidate.v1",
+    "repository_identity": "StegVerse-Labs/StegBiography",
+    "credential_authority": "TV/TVC",
+    "github_token_authority": "NONE",
+    "authority_effect": "NONE",
+    "native_records_mutated": false,
+    "evaluation_changed": false
+  },
+  "result": "PASS",
+  "promotion_effect": "eligible for ERL registry CONFORMING promotion; local evaluation authority remains NONE"
+}
