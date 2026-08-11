@@ -43,35 +43,57 @@ def main() -> int:
         (base / "research/acquisition_requests.jsonl").write_text("", encoding="utf-8")
         (base / "research/source_candidates.jsonl").write_text("", encoding="utf-8")
         (base / "research/research_receipts.jsonl").write_text("", encoding="utf-8")
-        (base / "data/sources/sources_whitelist.csv").write_text("name,url,authority_class\nfixture,https://fixture.local/index,official\n", encoding="utf-8")
+        (base / "data/sources/sources_whitelist.csv").write_text(
+            "name,url,authority_class\npositive,https://fixture.local/positive,official\nnull,https://fixture.local/null,official\n",
+            encoding="utf-8",
+        )
 
         assert adapter.reqs(base) == [], "DELEGATED recurrence must suppress implicit frontier searches"
 
         explicit = {"request_id":"REQ1","trajectory_ids":["T1"],"query":"alpha beta","state":"ACTIVE"}
         (base / "research/acquisition_requests.jsonl").write_text(json.dumps(explicit)+"\n", encoding="utf-8")
-        html = b'<a href="/alpha-beta-record">alpha beta record</a><a href="/alpha-beta-record">alpha beta record</a><a href="/other">other</a>'
+        positive_html = b'<a href="/alpha-beta-support">alpha beta supporting record</a><a href="/alpha-beta-support">alpha beta supporting record</a><a href="/alpha-beta-contrary">alpha beta contrary record</a><a href="/other">other</a>'
+        null_html = b'<a href="/unrelated">unrelated record</a>'
 
-        with mock.patch.object(adapter.urllib.request, "urlopen", return_value=FakeResponse(html)), mock.patch.object(sys, "argv", [str(ADAPTER), "--base", str(base)]):
+        def fake_urlopen(request, timeout=15):
+            url = getattr(request, "full_url", str(request))
+            return FakeResponse(null_html if url.endswith("/null") else positive_html)
+
+        with mock.patch.object(adapter.urllib.request, "urlopen", side_effect=fake_urlopen), mock.patch.object(sys, "argv", [str(ADAPTER), "--base", str(base)]):
             adapter.main()
 
         candidates = read_jsonl(base / "research/source_candidates.jsonl")
         receipts = read_jsonl(base / "research/research_receipts.jsonl")
-        assert len(candidates) == 1, "duplicate matching links must collapse to one candidate"
-        assert len(receipts) == 1
-        c = candidates[0]
-        assert c["schema"] == "stegverse.erl.research_source_candidate.v1"
-        assert c["repository"] == "StegVerse-Labs/StegBiography"
-        assert c["trajectory_ids"] == ["T1"]
-        assert c["native_records_mutated"] is False
-        assert c["evaluation_changed"] is False
-        assert c["transport"]["credential_authority"] == "TV/TVC"
-        assert c["transport"]["github_token_authority"] == "NONE"
-        assert c["transport"]["authority_effect"] == "NONE"
-        assert receipts[0]["result"] == "CANDIDATES_EMITTED"
-        assert receipts[0]["hits"] == 1
-        assert receipts[0]["recurrence_classification"] == "DELEGATED"
+        assert len(candidates) == 2, "supporting and contrary candidate leads must both be preserved while duplicate links collapse"
+        assert len(receipts) == 2
+        assert {c["source_title"] for c in candidates} == {"alpha beta supporting record", "alpha beta contrary record"}
+        for c in candidates:
+            assert c["schema"] == "stegverse.erl.research_source_candidate.v1"
+            assert c["repository"] == "StegVerse-Labs/StegBiography"
+            assert c["trajectory_ids"] == ["T1"]
+            assert c["native_records_mutated"] is False
+            assert c["evaluation_changed"] is False
+            assert c["transport"]["credential_authority"] == "TV/TVC"
+            assert c["transport"]["github_token_authority"] == "NONE"
+            assert c["transport"]["authority_effect"] == "NONE"
+        assert any(r["result"] == "CANDIDATES_EMITTED" and r["hits"] == 2 for r in receipts)
+        assert any(r["result"] == "NO_UPDATE" and r["hits"] == 0 for r in receipts), "null-result evidence must be preserved"
+        assert all(r["recurrence_classification"] == "DELEGATED" for r in receipts)
 
-        print(json.dumps({"status":"PASS","repository":"StegVerse-Labs/StegBiography","candidates":1,"receipts":1,"duplicate_links_collapsed":True,"delegated_frontier_suppressed":True,"explicit_request_executed":True,"credential_authority":"TV/TVC","github_token_authority":"NONE","authority_effect":"NONE"}, sort_keys=True))
+        print(json.dumps({
+            "status":"PASS",
+            "repository":"StegVerse-Labs/StegBiography",
+            "candidates":2,
+            "receipts":2,
+            "duplicate_links_collapsed":True,
+            "supporting_and_contrary_leads_preserved":True,
+            "null_result_preserved":True,
+            "delegated_frontier_suppressed":True,
+            "explicit_request_executed":True,
+            "credential_authority":"TV/TVC",
+            "github_token_authority":"NONE",
+            "authority_effect":"NONE"
+        }, sort_keys=True))
     return 0
 
 
