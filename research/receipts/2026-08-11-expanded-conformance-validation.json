@@ -1,0 +1,27 @@
+{
+  "schema": "stegverse.erl.research_surface_validation_receipt.v1",
+  "repository": "StegVerse-Labs/StegBiography",
+  "adapter_commit": "6fe2ec4af4f26806fdbb39606d996e1c39821f76",
+  "test_commit": "cc6c25733f7f3a69f88366e48258f6bd9d9e8ef9",
+  "standard_commit": "StegVerse-Labs/Executive_Rhetoric_Ledger@22d8021f31bd48131de2ce590f7d1703687dc149",
+  "validation_type": "expanded_local_deterministic_conformance_execution",
+  "assertions": {
+    "delegated_frontier_auto_search_suppressed": true,
+    "explicit_request_executed": true,
+    "supporting_candidate_preserved": true,
+    "contrary_candidate_preserved": true,
+    "null_result_preserved": true,
+    "duplicate_matching_link_collapsed": true,
+    "candidate_count": 2,
+    "receipt_count": 2,
+    "candidate_intake_validator": "PASS",
+    "credential_authority": "TV/TVC",
+    "github_token_authority": "NONE",
+    "authority_effect": "NONE",
+    "native_records_mutated": false,
+    "evaluation_changed": false
+  },
+  "new_trajectory_boundary": "Candidate evidence may reveal a distinct explanation, but only reviewed ERL evidence movement may create the authoritative new trajectory.",
+  "result": "PASS",
+  "promotion_state": "CONFORMING"
+}
