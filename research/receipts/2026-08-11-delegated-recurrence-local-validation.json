@@ -1,0 +1,25 @@
+{
+  "schema": "stegverse.erl.research_surface_validation_receipt.v1",
+  "repository": "StegVerse-Labs/StegBiography",
+  "validated_commit": "6fe2ec4af4f26806fdbb39606d996e1c39821f76",
+  "validated_surface": "scripts/search_agent.py",
+  "validation_type": "local_deterministic_execution",
+  "fixture": {
+    "frontier": "one ACTIVE trajectory with acquisition query alpha beta",
+    "conformance_recurrence": "DELEGATED",
+    "explicit_request": "REQ1 for trajectory T1"
+  },
+  "assertions": {
+    "delegated_frontier_requests_without_explicit_task": 0,
+    "explicit_requests_under_delegation": 1,
+    "candidate_schema": "stegverse.erl.research_source_candidate.v1",
+    "repository_identity": "StegVerse-Labs/StegBiography",
+    "credential_authority": "TV/TVC",
+    "github_token_authority": "NONE",
+    "authority_effect": "NONE",
+    "native_records_mutated": false,
+    "evaluation_changed": false
+  },
+  "result": "PASS",
+  "interpretation": "Umbrella-level automatic frontier recurrence is suppressed while DELEGATED, preventing duplicate subject-level searches. Explicit ERL acquisition requests remain executable. No candidate gains evaluation authority and no GitHub token authority exists."
+}
