@@ -23,6 +23,12 @@
   "native_records_mutation_by_erl_sidecar": false,
   "github_token_authority": "NONE",
   "credential_authority": "TV/TVC where applicable",
-  "validation_state": "PENDING_VALIDATION",
-  "next_action": "run deterministic populated fixture including delegation behavior, validate ERL intake/transport, then promote registry to CONFORMING"
+  "validation_state": "CONFORMING",
+  "validation_evidence": [
+    "research/receipts/2026-08-11-delegated-recurrence-local-validation.json",
+    "research/receipts/2026-08-11-populated-adapter-and-intake-validation.json",
+    "tests/test_research_adapter_deterministic.py"
+  ],
+  "validated_adapter_commit": "6fe2ec4af4f26806fdbb39606d996e1c39821f76",
+  "next_action": "remain delegated to subject-specific research surfaces; accept explicit ERL acquisition requests without autonomous duplicate recurrence"
 }
