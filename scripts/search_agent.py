@@ -4,7 +4,7 @@ import argparse,csv,hashlib,json,pathlib,re,urllib.request
 from datetime import datetime,timezone
 from html.parser import HTMLParser
 from urllib.parse import urljoin
-REPOSITORY="StegVerse-Labs/StegBiography";UA="StegVerse-ERL-Research/1.1"
+REPOSITORY="StegVerse-Labs/StegBiography";UA="StegVerse-ERL-Research/1.2"
 def now():return datetime.now(timezone.utc).isoformat()
 def sid(*p):return hashlib.sha256("|".join(map(str,p)).encode()).hexdigest()[:24]
 def append(path,obj,dry):
@@ -24,11 +24,20 @@ class Links(HTMLParser):
         if self.h is not None:self.t.append(d)
     def handle_endtag(self,tag):
         if tag=="a" and self.h is not None:self.links.append((" ".join(self.t).strip(),self.h));self.h=None;self.t=[]
+def recurrence_classification(base):
+    conf=js(base/"research/conformance.json")
+    return ((conf.get("recurrence") or {}).get("classification") or "NOT_REQUIRED").upper()
 def reqs(base):
-    out=jl(base/"research/acquisition_requests.jsonl");f=js(base/"research/frontier.json")
-    for t in f.get("trajectories",[]):
-        if t.get("state") in {"OPEN","ACTIVE"}:
-            for q in t.get("acquisition_queries",[]):out.append({"request_id":"frontier-"+sid(t.get("trajectory_id"),q),"trajectory_ids":[t.get("trajectory_id")],"query":q,"state":"ACTIVE"})
+    # Explicit ERL acquisition requests always remain executable. Automatic frontier
+    # recurrence is suppressed while this umbrella surface is DELEGATED, preventing
+    # duplicate subject-level searches.
+    out=jl(base/"research/acquisition_requests.jsonl")
+    f=js(base/"research/frontier.json")
+    delegated=recurrence_classification(base)=="DELEGATED"
+    if not delegated:
+        for t in f.get("trajectories",[]):
+            if t.get("state") in {"OPEN","ACTIVE"}:
+                for q in t.get("acquisition_queries",[]):out.append({"request_id":"frontier-"+sid(t.get("trajectory_id"),q),"trajectory_ids":[t.get("trajectory_id")],"query":q,"state":"ACTIVE"})
     return [r for r in out if r.get("state","ACTIVE") in {"OPEN","ACTIVE","RETRY"}]
 def packet(r,s,title,link):return {"schema":"stegverse.erl.research_source_candidate.v1","candidate_id":"SRC-"+sid(r.get("request_id"),link),"repository":REPOSITORY,"trajectory_ids":r.get("trajectory_ids",[]),"acquisition_request_id":r.get("request_id"),"query":r.get("query",""),"source_url":link,"source_title":title,"retrieved_at":now(),"source_class":s.get("authority_class") or s.get("type") or "unknown","authority_proximity":"unknown","content_sha256":None,"custody_pointer":None,"verification_state":"UNVERIFIED","evidence_role":"lead-only","discovered_by":"scripts/search_agent.py","native_records_mutated":False,"evaluation_changed":False,"transport":{"source_repository":REPOSITORY,"destination_repository":"StegVerse-Labs/Executive_Rhetoric_Ledger","authority_effect":"NONE","credential_authority":"TV/TVC","github_token_authority":"NONE"}}
 def main():
@@ -46,7 +55,7 @@ def main():
                     if key in seen:continue
                     seen.add(key);hits.append((title,link))
                 for title,link in hits[:10]:append(b/"research/source_candidates.jsonl",packet(r,s,title,link),a.dry_run);n+=1
-                append(b/"research/research_receipts.jsonl",{"receipt_id":"RSRCH-"+sid(r.get("request_id"),u,h),"request_id":r.get("request_id"),"trajectory_ids":r.get("trajectory_ids",[]),"source_scanned":u,"retrieved_at":now(),"response_hash":h,"hits":len(hits),"result":"NO_UPDATE" if not hits else "CANDIDATES_EMITTED","evaluation_changed":False},a.dry_run)
-            except Exception as e:append(b/"research/research_receipts.jsonl",{"receipt_id":"RSRCH-"+sid(r.get("request_id"),u,now()),"request_id":r.get("request_id"),"trajectory_ids":r.get("trajectory_ids",[]),"source_scanned":u,"retrieved_at":now(),"result":"FAILED","error":type(e).__name__,"evaluation_changed":False},a.dry_run)
-    print(json.dumps({"repository":REPOSITORY,"requests":len(R),"sources":len(S),"candidates":n,"dry_run":a.dry_run,"candidate_schema":"stegverse.erl.research_source_candidate.v1","credential_authority":"TV/TVC","github_token_authority":"NONE"},sort_keys=True))
+                append(b/"research/research_receipts.jsonl",{"receipt_id":"RSRCH-"+sid(r.get("request_id"),u,h),"request_id":r.get("request_id"),"trajectory_ids":r.get("trajectory_ids",[]),"source_scanned":u,"retrieved_at":now(),"response_hash":h,"hits":len(hits),"result":"NO_UPDATE" if not hits else "CANDIDATES_EMITTED","evaluation_changed":False,"recurrence_classification":recurrence_classification(b)},a.dry_run)
+            except Exception as e:append(b/"research/research_receipts.jsonl",{"receipt_id":"RSRCH-"+sid(r.get("request_id"),u,now()),"request_id":r.get("request_id"),"trajectory_ids":r.get("trajectory_ids",[]),"source_scanned":u,"retrieved_at":now(),"result":"FAILED","error":type(e).__name__,"evaluation_changed":False,"recurrence_classification":recurrence_classification(b)},a.dry_run)
+    print(json.dumps({"repository":REPOSITORY,"requests":len(R),"sources":len(S),"candidates":n,"dry_run":a.dry_run,"recurrence_classification":recurrence_classification(b),"frontier_auto_recurrence_enabled":recurrence_classification(b)!="DELEGATED","candidate_schema":"stegverse.erl.research_source_candidate.v1","credential_authority":"TV/TVC","github_token_authority":"NONE"},sort_keys=True))
 if __name__=="__main__":main()
